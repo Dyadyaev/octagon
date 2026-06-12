@@ -1,4 +1,5 @@
 const express = require('express');
+const db = require('./db');
 
 const app = express();
 
@@ -35,6 +36,123 @@ app.get('/dynamic', (req, res) => {
         header: 'Calculated',
         body: String(result)
     });
+});
+
+app.get('/getAllItems', (req, res) => {
+
+    db.query(
+        'SELECT * FROM Items',
+        (err, results) => {
+
+            if (err) {
+                return res.json(null);
+            }
+
+            res.json(results);
+        }
+    );
+
+});
+
+app.post('/addItem', (req, res) => {
+
+    const name = req.query.name;
+    const desc = req.query.desc;
+
+    if (!name || !desc) {
+        return res.json(null);
+    }
+
+    db.query(
+        'INSERT INTO items(name, `desc`) VALUES (?, ?)',
+        [name, desc],
+        (err, result) => {
+
+            if (err) {
+                return res.json(null);
+            }
+
+            db.query(
+                'SELECT * FROM items WHERE id = ?',
+                [result.insertId],
+                (err, rows) => {
+
+                    if (err) {
+                        return res.json(null);
+                    }
+
+                    res.json(rows[0]);
+                }
+            );
+        }
+    );
+});
+
+app.post('/deleteItem', (req, res) => {
+
+    const id = Number(req.query.id);
+
+    if (!id) {
+        return res.json(null);
+    }
+
+    db.query(
+        'DELETE FROM items WHERE id = ?',
+        [id],
+        (err, result) => {
+
+            if (err) {
+                return res.json(null);
+            }
+
+            if (result.affectedRows === 0) {
+                return res.json({});
+            }
+
+            res.json({
+                deleted: true
+            });
+        }
+    );
+});
+
+app.post('/updateItem', (req, res) => {
+
+    const id = Number(req.query.id);
+    const name = req.query.name;
+    const desc = req.query.desc;
+
+    if (!id || !name || !desc) {
+        return res.json(null);
+    }
+
+    db.query(
+        'UPDATE Items SET name=?, `desc`=? WHERE id=?',
+        [name, desc, id],
+        (err, result) => {
+
+            if (err) {
+                return res.json(null);
+            }
+
+            if (result.affectedRows === 0) {
+                return res.json({});
+            }
+
+            db.query(
+                'SELECT * FROM items WHERE id=?',
+                [id],
+                (err, rows) => {
+
+                    if (err) {
+                        return res.json(null);
+                    }
+
+                    res.json(rows[0]);
+                }
+            );
+        }
+    );
 });
 
 app.listen(3000, () => {
