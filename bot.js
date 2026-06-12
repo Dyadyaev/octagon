@@ -14,3 +14,31 @@ bot.onText(/\/start/, (msg) => {
     );
 
 });
+
+bot.onText(/\/help/, (msg) => {
+
+    bot.sendMessage(
+        msg.chat.id,
+        '/site - сайт Октагон\n' +
+        '/creator - информация о создателе'
+    );
+
+});
+
+bot.onText(/\/site/, (msg) => {
+
+    bot.sendMessage(
+        msg.chat.id,
+        'https://octagon-students.ru/'
+    );
+
+});
+
+bot.onText(/\/creator/, (msg) => {
+
+    bot.sendMessage(
+        msg.chat.id,
+        'Дядяев Ярослав'
+    );
+
+});
